@@ -1,0 +1,69 @@
+This is desigend for the BBC's microbit and will (probly) not work with out it. 
+This system is a Server-Client system that sends data from the server once the clinet recives power 
+The data sent is built around Dunguons and Dragons (5e), and the stats names represent that. Althoug it is easy enough to change to better suit diffrent needs
+This system currently works (mostly) with 2 clients and 1 server. It is possalbe to add as many clients as the server will handle. 
+This system is also designed for a situation with out constant power, but any test to debug this have been conduted with the reset button on the back of the Microbit
+
+Once a client is powered, it will first intalize a dictionary called stlt, which contanes every stat in the system, and puts them to zero.
+the server should do these steps for the number of clinets you plan to run, although this will have to be hard coded
+	Once the Server is powered, it will initalze a dictionary for the stats and sets each one to 0. 
+	it will also initalze a copy of that dictionary 
+	they are called id+ stats0 (Estats0) and id+ stats1 (Estats1), where id can be anything used to diffrenate between multabel sets
+	It will also intialize id + working = id + stats1 (Eworking = Estats1) and id + backup = id + stats0 (Ebackup = Estats0)
+	This is for double buffering the data. all data sent comes form the backup set, and all new data is saved to working set. after receiveing new data, working and backup switch there positions (i.e. Eworking now == Estats0)
+once done all id + working and id + backup feilds are saved in a list called both
+it whill then set up the list base, which will have every type of data (or in this case stat) in side of it
+
+The server will then enter a while True: loop in wich it starts by deffing message to radio.receive()
+if message == None:
+	continue
+
+once the client is done setting up the dictioanry it will go into the function start(stlt) with stlt
+once inside, it will send the message 'start' via the radio.
+the client then goes into the function acc(resend) with 'start'
+	this funcction intialis incoming = radio.receive()
+	the function has a timer running
+	if incoming != 'ack' and timer == 3000:
+		the client will resend the message and set the timer to 0
+	if incoming == 'ack':
+		the client will return form the function 
+on the server if message == 'start':
+	It will go into the function start with both
+	it will then send the message 'ack'
+	it will then set twho = the result of the function who()
+		it intalizes incoming = radio.receive()
+		it then checks if incoming == a vaild id (in this case f & e)
+		it will then send the message 'ack'
+		it then returns the the id
+The client will then send a message that is the same as the its id on the Servers side
+the client will then run acc() with its id
+the server then checks the id and sends over every stat one at a time running the function acc for each one
+once the client recievs a stat it will send the message 'ack' and then save the stat for every stat 
+the client will display the message 'done' once it is finished 
+all new data is save into stlt
+
+after the done message is sent and b button is pressed you are able to edit the stats
+	it will then define sty = the function stat()
+	you can scroll thought the types of stats with the b button.
+	once you have found the stat that you wish to edit, press and hold the a button until it is no longer on the screen
+	it will then return the stat you wanted
+	it will then enter the function edit_mode with stlt[sty] and sty
+	in edit mode the current number assoated with that stat is shown once. 
+	you can then press the a button to make a change to it 
+	there are 4 types of chages that can be made, and you can cicle through them with the b button they are
+		+10
+		-10
+		+1
+		-1
+	every time the b button is pressed the Client saves to the server through the function save()
+		it takes the type of stat and the value of the stat, and combines it with the id to send this message
+			id + str(sty) + str(incoming) #incoming is the data behind the stat
+		it then runs the fucntion acc() with that same str
+		the sever than sends the message 'ack'
+		the sever than saves the str to it's memory by breaking down the message into it's 3 parts 
+	pressing the b button for the 4th time will display the word 'done'
+		pressing the a button will return you out of the function
+		pressing the b button will put you back a +10 
+
+
+there is a fun ester egg if you press the b button on the server while it is not in the function. 
